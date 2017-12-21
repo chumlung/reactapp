@@ -1,5 +1,5 @@
 import axios from 'axios';
-let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsImlhdCI6MTUxMzc2MjQ0NywiZXhwIjoxNTEzNzYyNzQ3fQ.GWQRB5sJdRmwj47it7aXtCd9WdTCaB7gY6w5-lONUIc';
+let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsImlhdCI6MTUxMzgzMzMxNiwiZXhwIjoxNTEzODMzNjE2fQ.ks3LfLaLqh7TBxIShIaSm31SLLmMI1xnJroltNXfKu8';
 let configs
 let axiosInstance = axios.create({
   headers: {'Authorization':token}
@@ -24,12 +24,13 @@ axiosInstance.interceptors.response.use((response)=>{
     else if(error.response.status === 401){
       configs = error.response.config
       axiosInstance.get('http://127.0.0.1:8848/api/users/1/refresh').then((result)=>{
-        console.log('new access token: ',result.data.newAccessToken)
         token = result.data.newAccessToken;
         configs.headers.Authorization = token;
-        console.log(configs.headers.Authorization)
         axiosInstance(configs);   
       })
+    }
+    else if (error.response.status === 422){
+      alert('access token not received') 
     }
   })
 
