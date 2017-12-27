@@ -38,14 +38,16 @@ class AddTodo extends Component{
   handleSubmit(event){
     event.preventDefault();
     axios.post('http://127.0.0.1:8848/api/users/1/todos', {
-        userID: this.state.userId,
-        details: this.state.details
-      }).then(()=>{
+      userID: this.state.userId,
+      details: this.state.details
+    }).then(()=>{
       this.props.onAddTodo(this.state);
       this.setState({
         userId: '',
         details: ''
       })
+    }).catch(()=>{
+      console.log('error caught')
     })
   }
 
@@ -56,7 +58,6 @@ class AddTodo extends Component{
         <form className="todo-form" onSubmit={this.handleSubmit}>
         <div className="form-UserId">
           <label htmlFor="inputTodoUserId">UserId: </label>
-          {/* <input name="userId" type="text" id="inputTodoUserId" value={this.state.userId} onChange={this.handleChange} placeholder="UserId"></input> */}
           <p>{this.state.userId}</p>
         </div>
         <div className="form-details">

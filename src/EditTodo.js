@@ -15,11 +15,13 @@ class EditForm extends Component{
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleCancel = this.handleCancel.bind(this);
 
   }
 
 
   handleChange(event){   
+    console.log('change')
     const target = event.target;
     const value = target.value;
     const name = target.name;
@@ -28,7 +30,7 @@ class EditForm extends Component{
       editItem:{
         id: this.props.toEdit.id,
         [name]:value,
-        userId: this.props.toEdit.userid
+        userId: this.props.toEdit.userId
       }
     })
   }
@@ -48,7 +50,17 @@ class EditForm extends Component{
         this.props.onEditTodo(this.state.editItem);
     })
   }
-  
+  handleCancel(event){
+    event.preventDefault();
+    this.setState({
+      editItem:{
+        id:null,
+        userId:null,
+        details:null
+      }
+    })
+    this.props.onCancelEdit(this.state.editItem);
+  }
   componentWillReceiveProps(nextProps){
     if(nextProps){
       this.setState({
@@ -66,7 +78,7 @@ class EditForm extends Component{
       <div className="edit-todo">
         <input name="details" type="text" id="inputDetails" value={this.state.editItem.details} onChange={this.handleChange} placeholder={this.state.editItem.details}></input>
         <button className='save-btn' onClick={this.handleSubmit}>Save</button>
-        <button className='cancel-btn'>Cancel</button>
+        <button className='cancel-btn' onClick={this.handleCancel}>Cancel</button>
       </div>
       </form>
     )

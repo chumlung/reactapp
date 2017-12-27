@@ -37,6 +37,7 @@ class App extends Component {
       }
     };
     this.handleEdit = this.handleEdit.bind(this);
+    this.handleCancelEdit = this.handleCancelEdit.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
   }
@@ -71,6 +72,15 @@ class App extends Component {
     })
     this.getList()
   }
+  handleCancelEdit(){
+    this.setState({
+      editItem:{
+        id:null,
+        details:null,
+        userid:null
+      }
+    })
+  }
 
   handleSearch(result){
     this.setState({ todos: result})
@@ -83,7 +93,7 @@ class App extends Component {
 
 
   render() {
-    console.log('edit',this.state.editItem)
+    console.log(this.state.editItem)
     return (
       <div className="App">
         <header className="App-header">
@@ -94,7 +104,7 @@ class App extends Component {
         <ul className="todo-list">
           {this.state.todos.map((todo, index) =>
             <li className="list-item" key={index}>
-              <h4>{todo.todoTitle}</h4>
+              <p>{todo.todoTitle}</p>
               <p className="list-item-info">{'UserID: ' + todo.userId}</p>
               <p className="list-item-info">{'ListID: ' + todo.id}</p>
               <p className="list-item-info">{'Details: ' + todo.details}</p>
@@ -103,7 +113,7 @@ class App extends Component {
             </li>
           )}
         </ul>
-        {this.state.editItem.id!=null?<EditComponent toEdit={this.state.editItem} onEditTodo={this.handleEdit}/>:null}
+        {this.state.editItem.id!=null?<EditComponent toEdit={this.state.editItem} onEditTodo={this.handleEdit} onCancelEdit={this.handleCancelEdit}/>:null}
         <AddTodo onAddTodo={this.handleAdd}></AddTodo>
       </div>
     );

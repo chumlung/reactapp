@@ -1,5 +1,5 @@
 import axios from 'axios';
-let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsImlhdCI6MTUxMzgzMzMxNiwiZXhwIjoxNTEzODMzNjE2fQ.ks3LfLaLqh7TBxIShIaSm31SLLmMI1xnJroltNXfKu8';
+let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpYXQiOjE1MTQzNTY4MzIsImV4cCI6MTUxNDM1NzEzMn0.yzByAOEOZVBpPyzDSQh-c_ed7vTSSQnS0DN8wHyCp6Y';
 let configs
 let axiosInstance = axios.create({
   headers: {'Authorization':token}
@@ -17,7 +17,6 @@ axiosInstance.interceptors.response.use((response)=>{
   }, (error)=>{
     console.log('err',error.response)
     if(error.response.status === 404){
-      console.log('error status'+error.response.status);
       alert('invalid user');
       return Promise.reject(error);
      }
@@ -27,10 +26,16 @@ axiosInstance.interceptors.response.use((response)=>{
         token = result.data.newAccessToken;
         configs.headers.Authorization = token;
         axiosInstance(configs);   
+      }).catch(()=>{
+        alert('session expired')
+        return Promise.reject(error)
       })
     }
     else if (error.response.status === 422){
       alert('access token not received') 
+    }
+    else{
+      return Promise.reject(error)
     }
   })
 
