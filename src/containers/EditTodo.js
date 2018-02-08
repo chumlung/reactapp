@@ -2,15 +2,20 @@ import { connect } from 'react-redux';
 import React from 'react'
 
 import axios from '../axioService';
-import { editTodo,handleChange,resetSingleTodo } from '../actions';
+import { editTodo, handleChange, resetSingleTodo } from '../actions';
 
-const EditForm = (props) =>{
+const EditForm = (props) => {
+  let triggerSaveAction = (event) => {
+    if (event.keyCode === 13) {
+      handleSubmit();
+    }
+  }
 
-  let handleSubmit=(event)=>{
-    event.preventDefault();
+  let handleSubmit = () => {
     props.editTodo(
       props.todos.singleTodo.listID,
       props.todos.singleTodo.userID,
+      props.todos.singleTodo.categoryID,
       props.todos.singleTodo.details
     );
     props.resetValues();
@@ -23,12 +28,12 @@ const EditForm = (props) =>{
   return(
     <form onSubmit = {handleSubmit}>
     <div className="edit-todo">
-      <textarea name="details" type="text" id="inputDetails" 
+      <input name="details" type="text" id="inputDetails" 
         value={props.todos.singleTodo.details}
         onChange={props.handleChange}
-        placeholder={props.todos.singleTodo.details}></textarea>
-      <button className='save-btn' onClick={handleSubmit}>Save</button>
-      <button className='cancel-btn' onClick={handleCancel}>Cancel</button>
+        onKeyDown={triggerSaveAction}
+        placeholder={props.todos.singleTodo.details}/>
+      <img height='25' width='25' src='../images/cancel-red-btn.png' alt='cancel' onClick={handleCancel}/>
     </div>
     </form>
   )
@@ -41,9 +46,9 @@ const mapStateToProps = state =>{
 }
 const mapDispatchToProps = dispatch =>{
   return{
-    editTodo: (listId,userId,details)=>{
+    editTodo: (listId, userId, categoryId, details)=>{
       dispatch(editTodo(
-        axios.put('http://127.0.0.1:8848/api/users/1/todos/'+listId,{
+        axios.put('http://127.0.0.1:8848/api/users/'+ userId+'/categories/'+categoryId+'/todos/'+listId,{
           userID: userId,
           details: details
         })

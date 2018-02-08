@@ -4,15 +4,24 @@ const INITIAL_STATE ={
   fetching: false,
   fetched: false,
   error: null,
+  categories:[],
   todos:[],
   singleTodo:{
     listID: null,
+    categoryID: null,
     details: '',
+    priority: '',
     date: moment()
+  },
+  singleCategory: {
+    name: ''
   },
   currentUser:{
     userID: 0,
     email: ''
+  },
+  currentCategory: {
+    categoryID: null
   },
   metadata:{
     page: 1,
@@ -54,11 +63,34 @@ export default (state=INITIAL_STATE,action)=>{
       }
     }
     case 'ADD_TODO_FULFILLED':{
+      let categoryIndex = state.categories.findIndex(category => category.id === action.payload.data.data.categoryId);
+      let changedCategory;
+      if (state.categories[categoryIndex].todo){
+        changedCategory = {
+          ...state.categories[categoryIndex],
+          todo:[
+            ...state.categories[categoryIndex].todo,
+            action.payload.data.data
+          ]
+        }
+      } else {
+        let todo = [
+          action.payload.data.data
+        ]
+        changedCategory = {
+          ...state.categories[categoryIndex],todo
+        }
+      } 
       return {
         ...state,
-        todos:[...state.todos,action.payload.data.data],
-        fetched:true,
-        fetching:false
+        categories:[
+          ...state.categories.slice(0, categoryIndex),
+          changedCategory,
+          ...state.categories.slice(categoryIndex+ 1)
+        ],	
+
+        fetched: true,
+        fetching: false
       } 
     }
     case 'ADD_TODO_REJECTED':{
@@ -116,9 +148,54 @@ export default (state=INITIAL_STATE,action)=>{
         error:action.payload
       }
     }
+    case 'FETCH_CATEGORIES_PENDING':{
+      return {
+        ...state,
+        fetching:true,
+        fetched:false
+      }
+    }
+    case 'FETCH_CATEGORIES_FULFILLED':{
+      return {
+        ...state,
+        categories:action.payload.data.data,
+        fetched:true,
+        fetching:false
+      } 
+    }
+    case 'FETCH_CATEGORIES_REJECTED':{
+      return {
+        ...state,
+        fetching:false,
+        error:action.payload
+      }
+    }
+    case 'ADD_CATEGORIES_PENDING':{
+      return {
+        ...state,
+        fetching:true,
+        fetched:false
+      }
+    }
+    case 'ADD_CATEGORIES_FULFILLED':{
+      return {
+        ...state,
+        categories:[...state.categories,action.payload.data.data],
+        fetched:true,
+        fetching:false
+      } 
+    }
+    case 'ADD_CATEGORIES_REJECTED':{
+      return {
+        ...state,
+        fetching:false,
+        error:action.payload
+      }
+    }
+
     case 'CHANGE_SEARCH_VALUE':{
       let event = action.payload;
-      let target = event.target;
+      let target = event.currentTarget;
       let value = target.value;
       let name = target.name;
       return{
@@ -134,20 +211,37 @@ export default (state=INITIAL_STATE,action)=>{
       }
     }
     case 'EDIT_TODO_FULFILLED':{
-      let index = parseInt(state.todos.findIndex(item => 
-        item.id === parseInt(action.payload.data.data.id,
-          10))
-          ,10)
-          return {
-        ...state,
-        todos:[
-          ...state.todos.slice(0,index),
+      let foundId;
+      state.categories.forEach(category => {
+        category.todo.forEach(todo => {
+          if (todo.id === action.payload.data.data.id){
+            foundId = todo.categoryId;
+          }
+        })
+      })
+      let categoryIndex = state.categories.findIndex(category => category.id === foundId);
+      let todoIndex = state.categories[categoryIndex].todo.findIndex(item =>
+        item.id === action.payload.data.data.id
+      )
+      let changedCategory = {
+        ...state.categories[categoryIndex],
+        todo:[
+          ...state.categories[categoryIndex].todo.slice(0, todoIndex),
           action.payload.data.data,
-          ...state.todos.slice(index+1)
-        ],
-        fetched:true,
-        fetching:false
-      } 
+          ...state.categories[categoryIndex].todo.slice(todoIndex + 1)
+        ]
+      }
+      return {
+        ...state,
+        categories:[
+          ...state.categories.slice(0, categoryIndex),
+          changedCategory,
+          ...state.categories.slice(categoryIndex+ 1)
+        ],	
+
+        fetched: true,
+        fetching: false
+      }
     }
     case 'EDIT_TODO_REJECTED':{
       return {
@@ -221,8 +315,28 @@ export default (state=INITIAL_STATE,action)=>{
         }
       }    
     }
+    case 'CHANGE_CAT_NAME':{
+      let event = action.payload;
+      let target = event.target;
+      let value = target.value;
+      let name = target.name;
+      return {
+        ...state,
+        singleCategory:{...state.singleCategory,
+          [name]:value
+        }
+      }    
+    }
+    case 'HANDLE_COMBO_CHANGE':{
+      return {
+        ...state,
+        singleTodo: {
+          ...state.singleTodo,
+          priority: action.payload
+        }
+      }   
+    }
     case 'CHANGE_TODO_DATE':{
-      console.log ('s payload', action.payload)
       return{
         ...state,
         singleTodo:{...state.singleTodo,
@@ -239,12 +353,21 @@ export default (state=INITIAL_STATE,action)=>{
         }
       }
     }
+    case 'RESET_SINGLE_CATEGORY':{
+      return{
+        ...state,
+        singleCategory:{...state.singleCategory,
+            name: ''
+        }
+      }
+    }
     case 'STORE_EDIT_VALUES':{
       return {
         ...state,
         singleTodo:{
           listID:action.payload.id,
           userID:action.payload.userId,
+          categoryID: action.payload.categoryId,
           details:action.payload.details
         }
       }
@@ -260,6 +383,44 @@ export default (state=INITIAL_STATE,action)=>{
           ...state.currentUser,[name]:value
         }
       } 
+    }
+    case 'STORE_EDIT_DATE':{
+      return {
+        ...state,
+        singleTodo: {
+          listID: action.payload.id,
+          userID: action.payload.userId,
+          categoryID: action.payload.categoryId,
+          date: moment(action.payload.date.substring(0,10),'YYYY-MM-DD')
+        }
+      }
+    }
+    case 'STORE_EDIT_PRIORITY':{
+      return {
+        ...state,
+        singleTodo: {
+          listID: action.payload.id,
+          userID: action.payload.userId,
+          categoryID: action.payload.categoryId,
+          priority: action.payload.priority
+        }
+      }
+    }
+    case 'STORE_CURRENT_CATEGORY': {
+      return {
+        ...state,
+        currentCategory: {
+          categoryID: action.payload
+        }
+      }
+    }
+    case 'RESET_CURRENT_CATEGORY': {
+      return {
+        ...state,
+        currentCategory: {
+          categoryID: null
+        }
+      }
     }
     default:
       return state;

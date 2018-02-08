@@ -32,11 +32,34 @@ export function searchTodo(payload){
     payload
   }
 }
-
+export function getCategories(payload) {
+  return {
+    type: "FETCH_CATEGORIES",
+    payload
+  }
+}
+export function addCategories(payload) {
+  return {
+    type: "ADD_CATEGORIES",
+    payload
+  }
+}
 export function handleChange(event){
   return{
     type: "HANDLE_CHANGE",
     payload : event
+  }
+}
+export function changeCatName(event){
+  return{
+    type: "CHANGE_CAT_NAME",
+    payload : event
+  }
+}
+export function handleComboChange(value){
+  return{
+    type: "HANDLE_COMBO_CHANGE",
+    payload : value
   }
 }
 
@@ -45,7 +68,11 @@ export function resetSingleTodo(){
     type: "RESET_SINGLE_TODO"
   }
 }
-
+export function resetSingleCategory(){
+  return{
+    type: "RESET_SINGLE_CATEGORY"
+  }
+}
 export function storeEditValues(todo){
   return{
     type:"STORE_EDIT_VALUES",
@@ -83,5 +110,28 @@ export function changeTodoDate(payload){
   return{
     type:"CHANGE_TODO_DATE",
     payload
+  }
+}
+export function storeEditDate(toEditDate){
+  return{
+    type: "STORE_EDIT_DATE",
+    payload: toEditDate
+  }
+}
+export function storeEditPriority(toEditPriority){
+  return{
+    type: "STORE_EDIT_PRIORITY",
+    payload: toEditPriority
+  }
+}
+export function storeCurrentCategory(event) {
+  return {
+    type: "STORE_CURRENT_CATEGORY",
+    payload: event
+  }
+}
+export function resetCurrentCategory(){
+  return{
+    type: "RESET_CURRENT_CATEGORY"
   }
 }

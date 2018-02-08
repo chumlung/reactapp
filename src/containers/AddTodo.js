@@ -4,10 +4,9 @@ import DatePicker from 'react-datepicker';
 
 import axios from '../axioService.js';
 import 'react-datepicker/dist/react-datepicker.css';
-import { addTodo,handleChange, resetSingleTodo, changeTodoDate } from '../actions';
+import { addTodo, handleChange, resetSingleTodo, changeTodoDate, resetCurrentCategory } from '../actions';
 
 const AddTodo=(props)=>{
-  
   let tags=['Learn','Work','Movie','Gadgets','Games','Food'];
   let tagsID=[];
   let toggleCheckbox = (event) => {
@@ -21,10 +20,13 @@ const AddTodo=(props)=>{
   let handleSubmit=(event)=>{
     event.preventDefault();
     props.addTodo(props.todos.currentUser.userID,
+      props.todos.currentCategory.categoryID,
       props.todos.singleTodo.details,
       props.todos.singleTodo.date._d,
-      tagsID);
+      tagsID,
+      props.todos.singleTodo.priority);
     props.resetValues();
+    props.resetCurrentCategory();
   }
 
   return(
@@ -34,17 +36,20 @@ const AddTodo=(props)=>{
       <div className="form-UserId">
         <label htmlFor="inputTodoUserId">UserId: {props.todos.currentUser.userID} </label>
       </div>
-      {props.todos.singleTodo.listID===null?
+      {props.todos.singleTodo.listID === null ?
         <div className="form-details">
           <label htmlFor="inputdetails">Details: </label>
-            <textarea name="details" type="text" id="inputdetails" 
+            <input name="details" type="text" id="inputdetails" 
               value={props.todos.singleTodo.details}
               onChange={props.handleChange}
-              placeholder="Details">
-            </textarea>
+              placeholder="Details"/>
+            <DatePicker selected={props.todos.singleTodo.date} onChange={props.handleDateChange}/>
             <div>
-            <label>Date:</label>
-              <DatePicker selected={props.todos.singleTodo.date} onChange={props.handleDateChange}/>
+              <label>Priority:</label>
+              <input name="priority" type="text" id="inputpriority" 
+              value={props.todos.singleTodo.priority}
+              onChange={props.handleChange}
+              placeholder="Priority"/>
             </div>
             <div>
             {tags.map((labels)=>
@@ -56,7 +61,7 @@ const AddTodo=(props)=>{
               </label>
             )}
             </div>
-        <button onClick={handleSubmit}>Add Todo</button>
+            <img height='25' width='25' src='../images/save-green-btn.png' alt='save' onClick={handleSubmit}/>
         </div>
         :<p>Cannot add while in edit</p>}
       </form>
@@ -72,10 +77,13 @@ const mapStateToProps = state =>{
 }
 const mapDispatchToProps = dispatch =>{
   return{
-    addTodo: (userId,details,date,tagsID)=>{
-      dispatch(addTodo(axios.post('http://127.0.0.1:8848/api/users/'+userId+'/todos', {
+    addTodo: (userId, categoryId, details, date, tagsID, priority)=>{
+      dispatch(addTodo(axios.post('http://127.0.0.1:8848/api/users/'
+        + userId + '/categories/' + categoryId + '/todos', {
+        categoryID: categoryId,
         userID: userId,
         details: details,
+        priority: priority,
         date: date,
         tags: tagsID
       })))
@@ -85,6 +93,9 @@ const mapDispatchToProps = dispatch =>{
     },
     resetValues:() =>{
       dispatch(resetSingleTodo())
+    },
+    resetCurrentCategory:() => {
+      dispatch(resetCurrentCategory())
     },
     handleDateChange:(date)=>{
       dispatch(changeTodoDate(date))
